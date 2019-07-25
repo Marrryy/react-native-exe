@@ -11,6 +11,7 @@ function Menu(props){
                 title={item.name}
                 subtitle={item.description}
                 hideChevron ={true} //right arrow for ios is now hide
+                onPress={() => props.onPress(item.id)}
                 leftAvatar={{ source: {pic}}}
             />
         );
