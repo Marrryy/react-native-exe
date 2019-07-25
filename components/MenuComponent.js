@@ -1,9 +1,22 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { View, FlatList } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import pic from './images/uthappizza.png';
+import { DISHES } from '../shared/dishes';
 
-function Menu(props){
+class Menu extends Component {
+  constructor(props){
+    super(props);
+    this.state={
+        dishes:DISHES,
+    };
+  }
+  static navigationOptions = {
+    title:"Menu"
+  };
+  render(){
+    const {navigate}= this.props.navigation
+  
     const renderMenuItem = ({item, index}) =>{
         return(
             <ListItem
@@ -11,18 +24,18 @@ function Menu(props){
                 title={item.name}
                 subtitle={item.description}
                 hideChevron ={true} //right arrow for ios is now hide
-                onPress={() => props.onPress(item.id)}
+                onPress={() => navigate('Dishdetail', { dishId: item.id })}
                 leftAvatar={{ source: {pic}}}
             />
         );
     }
     return(
       <FlatList
-        data={props.dishes}
+        data={this.state.dishes}
         renderItem={renderMenuItem}
         keyExtractor={item =>item.id.toString()}
       />
     );
-} 
+} }
 
 export default Menu;
