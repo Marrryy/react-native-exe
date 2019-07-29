@@ -4,10 +4,28 @@ import Dishdetail from './DishdetailComponent';
 import Home from './HomeComponent';
 import About from './AboutComponent';
 import Contact from './ContactComponent';
-import { View, Platform, Text, ScrollView, Image, StyleSheet } from 'react-native';
+import { View, Platform, Text, StyleSheet, ScrollView ,Image} from 'react-native';
 import { createStackNavigator, createDrawerNavigator, DrawerItems, SafeAreaView } from 'react-navigation';
 import { Icon } from 'react-native-elements';
 import logo from './images/logo.png';
+import { connect } from 'react-redux';
+import { fetchDishes, fetchComments, fetchPromos, fetchLeaders } from '../redux/ActionCreators';
+
+const mapStateToProps = state => {
+  return {
+    dishes: state.dishes,
+    comments: state.comments,
+    promotions: state.promotions,
+    leaders: state.leaders
+  }
+}
+const mapDispatchToProps = dispatch => ({
+  fetchDishes: () => dispatch(fetchDishes()),
+  fetchComments: () => dispatch(fetchComments()),
+  fetchPromos: () => dispatch(fetchPromos()),
+  fetchLeaders: () => dispatch(fetchLeaders()),
+})
+
 
 const MenuNavigator = createStackNavigator({
     Menu:{screen:Menu, 
@@ -198,13 +216,23 @@ const style=StyleSheet.create({
 });
 
 class Main extends Component{
-
-    render(){
-        return (
-            <View style={{flex:1, paddingTop:Platform.OS=== 'ios' ? 0 : Expo.Constants.statusBarHeight}}>
-                <MainNavigator/>
-            </View>
-        );
-    }
+  componentDidMount() {
+    this.props.fetchDishes();
+    this.props.fetchComments();
+    this.props.fetchPromos();
+    this.props.fetchLeaders();
+  }
+  render(){
+      return (
+          <View style={{flex:1, paddingTop:Platform.OS=== 'ios' ? 0 : Expo.Constants.statusBarHeight}}>
+              {/* <Text>JUST SLEEPING</Text> */}
+              <MainNavigator/>
+              
+          </View>
+      );
+  }
 }
-export default Main;
+
+
+
+export default connect(mapStateToProps,mapDispatchToProps)(Main);
