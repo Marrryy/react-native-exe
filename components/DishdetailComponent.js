@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { Text, View , ScrollView, FlatList, Modal} from 'react-native';
-import { Card , Icon,Rating,Input,AirbnbRating, Button} from 'react-native-elements';
+import { Text, View , ScrollView, FlatList, Modal, StyleSheet,Alert,PanResponder} from 'react-native';
+import { Card , Icon,Rating,Input,Button} from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import { postFavorite, postComment } from '../redux/ActionCreators';
@@ -47,43 +47,78 @@ function RenderComment(props){
 }
 
 function RenderDish(props) {
-
   const dish = props.dish;
 
-    if (dish != null) {
-      return(
-        <Animatable.View animation='fadeInDown' duration={2000} delay={1000}>
-        <Card
-          featuredTitle={dish.name}
-          image={{uri:baseUrl+dish.image}}>
-              <Text style={{margin: 10}}>
-                  {dish.description}
-              </Text>
-              <View style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center"
-              }}>
-              <Icon raised
-              reverse
-              name={props.favorite ? 'heart': 'heart-o'}
-              type={'font-awesome'}
-              color='#f50'
-              onPress={()=> props.favorites ? console.log('Already Favorite') : props.onPress()}
-                />
-              <Icon raised
-                reverse
-                name={'pencil'}
-                type={'font-awesome'}
-                color='#512DA8'
-                onPress={()=> props.openModal()}
-                  />
-              </View>
-              
-          </Card>
-        </Animatable.View>
-      );
+  const recognizeDrag =({moveX,moveY,dx,dy})=>{
+    if(dx<-200){
+      return true;
     }
+    else{
+      return false;
+    }
+  };
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder:(e,gestureState)=>{
+      return true;
+    },
+    onPanResponderEnd:(e,gestureState)=>{
+      if(recognizeDrag(gestureState)){
+        Alert.alert(
+          'Add Favorite',
+          'Are you sure you wish to add '+dish.name+' to Favorites?',
+          [
+            {
+              text:'Cancel',
+              onPress:()=>console.log("Cancel Pressed"),
+              style:'cancel'
+            },
+            {
+              text:"OK",
+              onPress:()=> {props.favorites ? console.log('Already Favorite') : props.onPress()}
+            }
+          ],{cancelable:false}
+        );
+      }
+      return true;
+    }
+  });
+
+  if (dish != null) {
+    return(
+      <Animatable.View animation='fadeInDown' duration={2000} delay={1000}
+      {...panResponder.panHandlers}>
+      <Card
+        featuredTitle={dish.name}
+        image={{uri:baseUrl+dish.image}}>
+            <Text style={{margin: 10}}>
+                {dish.description}
+            </Text>
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+            <Icon raised
+            reverse
+            name={props.favorite ? 'heart': 'heart-o'}
+            type={'font-awesome'}
+            color='#f50'
+            onPress={()=> props.favorites ? console.log('Already Favorite') : props.onPress()}
+              />
+            <Icon raised
+              reverse
+              name={'pencil'}
+              type={'font-awesome'}
+              color='#512DA8'
+              onPress={()=> props.openModal()}
+                />
+            </View>
+            
+        </Card>
+      </Animatable.View>
+    );
+  }
 }
 
 class Dishdetail extends Component{
@@ -105,8 +140,6 @@ class Dishdetail extends Component{
       })
     }
     submitComment(dishId){  
-    console.log(JSON.stringify(this.state));
-    
     this.props.postComment(dishId,this.state.rating,this.state.author,this.state.comment);
     this.toggleModal();
     }
