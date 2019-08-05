@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Text,ScrollView , View, StyleSheet, Picker, Switch, Button, Modal, Alert} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import * as Animatable from 'react-native-animatable'; 
-import { Permissions, Notifications } from 'expo';
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions'
 
 class Reservation extends Component{
   constructor(props){
