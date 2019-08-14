@@ -3,7 +3,8 @@ import { Text,ScrollView , View, StyleSheet, Picker, Switch, Button, Modal, Aler
 import DatePicker from 'react-native-datepicker';
 import * as Animatable from 'react-native-animatable'; 
 import { Notifications } from 'expo';
-import * as Permissions from 'expo-permissions'
+import * as Permissions from 'expo-permissions';
+import * as Calendar from 'expo-calendar';
 
 class Reservation extends Component{
   constructor(props){
@@ -47,6 +48,42 @@ class Reservation extends Component{
     });
   }
 
+  async obtainCalendarPermission(){
+    let calendarPermission = await Permissions.getAsync(Permissions.CALENDAR);
+    if(calendarPermission.status !== 'granted'){
+      calendarPermission = await Permissions.askAsync(Permissions.CALENDAR);
+      if(calendarPermission.status !== 'granted'){
+        Alert.alert('Permission not granted to calendar');
+      }
+    }
+  }
+
+//  async addReservationToCalendar(date){
+    addReservationToCalendar = async (date) => {
+    try{
+
+    
+    await this.obtainCalendarPermission();
+    var calendar = await Calendar.getCalendarsAsync();
+
+    let dateParse = Date.parse(date);
+    let startDate = new Date(dateParse);
+    dateParse = dateParse+(2*60*60*1000);
+    let endDate = new Date(dateParse);
+
+    var event = await Calendar.createEventAsync(calendar[0].id,{
+      title: 'Con Fusion Table Reservation',
+      startDate,
+      endDate,
+      timeZone:'Asia/Hong_Kong',
+      location: '121, Clear Water Bay Road, Clear Water Bay, Kowloon, Hong Kong'
+    });    
+
+  }catch(err){
+    console.log(err)
+  }
+  }
+
   toggleModal(){
     this.setState({
       showModal:!this.state.showModal
@@ -54,6 +91,9 @@ class Reservation extends Component{
   }
   handleReservation(){
     console.log(JSON.stringify(this.state));
+    this.presentLocalNotification(this.state.date);
+    this.addReservationToCalendar(this.state.date);
+    this.resetForm();
     this.toggleModal();
   }
 
@@ -138,9 +178,7 @@ class Reservation extends Component{
                   },
                   {
                     text:'Ok',
-                    onPress:()=>{
-                      this.presentLocalNotification(this.state.date)
-                      this.resetForm()}
+                    onPress:()=>{this.handleReservation()}
                   }
                 ],
                 {cancelable:false}
